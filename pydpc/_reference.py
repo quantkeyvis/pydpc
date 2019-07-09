@@ -55,7 +55,7 @@ class Cluster(object):
         self._get_membership()
         self._get_halo()
     def _get_distances(self):
-        self.distances = _np.zeros(shape=(self.npoints, self.npoints), dtype=_np.float64)
+        self.distances = _np.zeros(shape=(self.npoints, self.npoints), dtype=_np.float16)
         for i in range(self.npoints - 1):
             for j in range(i + 1, self.npoints):
                 self.distances[i, j] = _np.linalg.norm(self.points[i, :] - self.points[j, :])
@@ -89,9 +89,8 @@ class Cluster(object):
                     self.neighbour[self.order[i]] = self.order[j]
         self.delta[self.order[0]] = self.delta.max()
     def _get_cluster_indices(self):
-        self.clusters = _np.intersect1d(
-            _np.where(self.density > self.min_density)[0],
-            _np.where(self.delta > self.min_delta)[0], assume_unique=True)
+        #self.clusters = _np.intersect1d(_np.where(self.density > self.min_density)[0],_np.where(self.delta > self.min_delta)[0], assume_unique=True)
+        self.clusters = _np.where(_np.percentile(self.density*self.delta,self.percent)<=self.density*self.delta)[0].astype(_np.intc)
         self.ncl = self.clusters.shape[0]
     def _get_membership(self):
         self.membership = -1 * _np.ones(shape=self.order.shape, dtype=_np.intc)
